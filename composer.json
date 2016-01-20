@@ -1,20 +1,24 @@
 {
-    "name": "gloudemans/calendar",
-    "description": "Laravel 4 Calendar, port of the CodeIgniter Calender Library",
+    "name": "mazedlx/calendar",
+    "description": "Laravel 5 Calendar, fork of gloudemans/calendar",
     "keywords": ["laravel", "calendar"],
     "authors": [
         {
             "name": "Rob Gloudemans",
-            "email": "Rob_Gloudemans@hotmail.com"
+            "email": "Rob_Gloudemans@hotmail.com",
+        },
+        {
+            "name": "Christian Leo-Pernold",
+            "email": "mazedlx@gmail.com"
         }
     ],
     "require": {
         "php": ">=5.3.0",
-        "illuminate/support": "~4|~5"
+        "illuminate/support": "~5"
     },
     "autoload": {
         "psr-0": {
-            "Gloudemans\\Calendar": "src/"
+            "Mazedlx\\Calendar": "src/"
         }
     },
     "minimum-stability": "dev"

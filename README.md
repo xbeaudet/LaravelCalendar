@@ -5,7 +5,7 @@ Install the package through [Composer](http://getcomposer.org/). Edit your proje
 ```php
 "require": {
 	"laravel/framework": "4.0.*",
-	"gloudemans/calendar": "dev-master"
+	"mazedlx/calendar": "dev-master"
 }
 ```
 
@@ -17,11 +17,11 @@ Now all you have to do is add the service provider of the package and alias the 
 
 Add a new line to the `service providers` array:
 
-	'Gloudemans\Calendar\CalendarServiceProvider'
+	'Mazedlx\Calendar\CalendarServiceProvider'
 
 And finally add a new line to the `aliases` array:
 
-	'Calendar'        => 'Gloudemans\Calendar\Facades\Calendar',
+	'Calendar'        => 'Mazedlx\Calendar\Facades\Calendar',
 
 Now you're ready to start using the calendar package in your application.
 
@@ -36,7 +36,7 @@ Calendar::generate();
 // Generate a calendar for the specified year and month
 Calendar::generate(2012, 6);
 
-// Add an array of events as the third parameter to add them to the calendar, 
+// Add an array of events as the third parameter to add them to the calendar,
 // keys should be the days of the month.
 $data = array(
 	3  => 'http://example.com/news/article/2006/03/',
@@ -73,7 +73,7 @@ Calendar::initialize($config);
 
 ## Template
 
-You can also change the template used for the calendar. 
+You can also change the template used for the calendar.
 
 ```php
 $template = '
