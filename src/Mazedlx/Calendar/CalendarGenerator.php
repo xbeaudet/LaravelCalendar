@@ -1,4 +1,4 @@
-<?php namespace Gloudemans\Calendar;
+<?php namespace Mazedlx\Calendar;
 
 use Lang;
 
