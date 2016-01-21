@@ -2,6 +2,8 @@
     "name": "mazedlx/calendar",
     "description": "Laravel 5 Calendar, fork of gloudemans/calendar",
     "keywords": ["laravel", "calendar"],
+    "homepage": "https://github.com/mazedlx/LaravelCalendar",
+    "license": "MIT",
     "authors": [
         {
             "name": "Rob Gloudemans",
@@ -9,7 +11,9 @@
         },
         {
             "name": "Christian Leo-Pernold",
-            "email": "mazedlx@gmail.com"
+            "email": "mazedlx@gmail.com",
+            "homepage": "https://mazedlx.net",
+            "role": "Developer"
         }
     ],
     "require": {
