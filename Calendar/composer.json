@@ -17,8 +17,8 @@
         "illuminate/support": "~5"
     },
     "autoload": {
-        "psr-0": {
-            "Mazedlx\\Calendar": "src/"
+        "psr-4": {
+            "Mazedlx\\Calendar\\": "src/"
         }
     },
     "minimum-stability": "dev"
