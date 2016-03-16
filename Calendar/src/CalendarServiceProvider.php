@@ -13,7 +13,7 @@ class CalendarServiceProvider extends ServiceProvider {
     
     public function boot()
     {
-        $this->loadTranslationsFrom(__DIR__.'/lang', 'Calendar');
+        $this->loadTranslationsFrom(__DIR__.'/lang', 'calendar');
         
     }
 

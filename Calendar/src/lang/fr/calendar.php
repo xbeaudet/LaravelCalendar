@@ -55,6 +55,6 @@ return array(
     'september'  => 'Septembre',
     'october'    => 'Octobre',
     'november'   => 'Novembre',
-    'december'   => 'Decembre'
+    'december'   => 'Décembre'
 
 );

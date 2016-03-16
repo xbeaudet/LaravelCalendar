@@ -4,15 +4,18 @@ use Lang;
 
 class CalendarGenerator {
 
-	protected $lang;
+	protected $lang = "";
 	protected $local_time;
 	protected $template			= '';
 	protected $start_day		= 'sunday';
 	protected $month_type		= 'long';
 	protected $day_type			= 'abr';
+	protected $day_month_format = 'long'; // added xb
 	protected $show_next_prev  	= false;
 	protected $next_prev_url   	= '';
 	protected $segments        	= false;
+    protected $next_prev_days   = true; // added xb
+    protected $bottom_days      = false; // added xb
 
 	/**
 	 * Constructor
@@ -23,8 +26,6 @@ class CalendarGenerator {
 	{
 		$this->local_time = time();
 		$this->next_prev_url = $request->url();
-
-		Lang::addNamespace('calendar', __DIR__ . '/../../lang');
 	}
 
 	// --------------------------------------------------------------------
@@ -62,7 +63,12 @@ class CalendarGenerator {
 	 */
 	public function generate($year = '', $month = '', $data = array())
 	{
-		// Set and validate the supplied month/year
+		// if lang is not supplied in initilize, set it to app default :
+        if($this->lang == "")
+        {
+            $this->lang = \App::getlocale();
+        }
+        // Set and validate the supplied month/year
 		if ($year == '')
 			$year  = date('Y', $this->local_time);
 
@@ -121,7 +127,12 @@ class CalendarGenerator {
 		{
 			// Add a trailing slash to the  URL if needed
 			$this->next_prev_url = preg_replace("/(.+?)\/*$/", "\\1/",  $this->next_prev_url);
-
+            // when using segments, suppress /year/month from uri if present, to avoid /year/mont/year/month-1
+            if($this->segments)
+            {
+                $this->next_prev_url = str_replace('/'.$year.'/'.$month, '', $this->next_prev_url);    
+            }
+            
 			$adjusted_date = $this->adjust_date($month - 1, $year);
 
 			$url = $this->segments ? $this->next_prev_url.$adjusted_date['year'].'/'.$adjusted_date['month'] : $this->next_prev_url.'?year='.$adjusted_date['year'].'&month='.$adjusted_date['month'];
@@ -169,29 +180,50 @@ class CalendarGenerator {
 
 			for ($i = 0; $i < 7; $i++)
 			{
-				$out .= ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_start_today'] : $this->temp['cal_cell_start'];
-
 				if ($day > 0 AND $day <= $total_days)
 				{
-					if (isset($data[$day]))
-					{
-						// Cells with content
-						$temp = ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_content_today'] : $this->temp['cal_cell_content'];
-						$out .= str_replace('{day}', $day, str_replace('{content}', $data[$day], $temp));
-					}
-					else
-					{
-						// Cells with no content
-						$temp = ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_no_content_today'] : $this->temp['cal_cell_no_content'];
-						$out .= str_replace('{day}', $day, $temp);
-					}
+					$out .= ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_start_today'] : $this->temp['cal_cell_start'];
+					
+					$day_print = ($this->day_month_format == 'long' ? str_repeat('0', 2-strlen($day)).$day : $day);
 				}
 				else
 				{
-					// Blank cells
-					$out .= $this->temp['cal_cell_blank'];
+					$out .= $day == $cur_day ? $this->temp['cal_cell_start_other_today'] : $this->temp['cal_cell_start_other'];	
+
+					if($day < 1)
+					{
+						$previous_date = $this->adjust_date(($month-1), $year);
+
+						$previous_month	= $previous_date['month'];
+						$previous_year	= $previous_date['year'];
+
+						// Determine the total days in the month
+						$total_previous_days = $this->get_total_days($previous_month, $previous_year);
+						$tmp_day = $total_previous_days + $day;
+						
+						$day_print = ($this->day_month_format == 'long' ? str_repeat('0', 2-strlen($tmp_day)).$tmp_day : $tmp_day);
+					}
+					else {
+						$day_print = ($this->day_month_format == 'long' ? str_repeat('0', 2-strlen($day-$total_days)).($day-$total_days) : ($day-$total_days));	
+					}
+					
 				}
 
+				
+				
+				if (isset($data[$day]))
+				{
+					// Cells with content
+					$temp = ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_content_today'] : $this->temp['cal_cell_content'];
+					$out .= str_replace('{day}', $day_print, str_replace('{content}', $data[$day], $temp));
+				}
+				else
+				{
+					// Cells with no content
+					$temp = ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_no_content_today'] : $this->temp['cal_cell_no_content'];
+					$out .= str_replace('{day}', $day_print, $temp);
+				}
+				
 				$out .= ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_end_today'] : $this->temp['cal_cell_end'];
 				$day++;
 			}
@@ -199,6 +231,20 @@ class CalendarGenerator {
 
 			$out .= $this->temp['cal_row_end'];
 
+		}
+
+		if($this->bottom_days)
+		{
+			$out .= $this->temp['week_row_start'];
+
+			$day_names = $this->get_day_names();
+
+			for ($i = 0; $i < 7; $i ++)
+			{
+				$out .= str_replace('{week_day}', $day_names[($start_day + $i) %7], $this->temp['week_day_cell']);
+			}
+
+			$out .= $this->temp['week_row_end'];
 		}
 
 		$out .= $this->temp['table_close'];
@@ -231,7 +277,7 @@ class CalendarGenerator {
 
 		$month = $month_names[$month];
 
-		return Lang::get('calendar::calendar.' . $month);
+		return htmlentities(Lang::get('calendar::calendar.' . $month, [], $this->lang));
 	}
 
 	// --------------------------------------------------------------------
@@ -268,9 +314,8 @@ class CalendarGenerator {
 
 		foreach($day_names as $val)
 		{
-			$days[] = Lang::get('calendar::calendar.' . $val);
+			$days[] = Lang::get('calendar::calendar.' . $val, [], $this->lang);
 		}
-
 		return $days;
 	}
 
@@ -359,27 +404,29 @@ class CalendarGenerator {
 	protected function default_template()
 	{
 		return  array(
-			'table_open'				=> '<table border="1" cellpadding="4" cellspacing="0">',
-			'heading_row_start'			=> '<tr>',
-			'heading_previous_cell'		=> '<th><a href="{previous_url}">&lt;&lt;</a></th>',
-			'heading_title_cell'		=> '<th colspan="{colspan}">{heading}</th>',
-			'heading_next_cell'			=> '<th><a href="{next_url}">&gt;&gt;</a></th>',
-			'heading_row_end'			=> '</tr>',
-			'week_row_start'			=> '<tr>',
-			'week_day_cell'				=> '<td>{week_day}</td>',
-			'week_row_end'				=> '</tr>',
-			'cal_row_start'				=> '<tr>',
-			'cal_cell_start'			=> '<td>',
-			'cal_cell_start_today'		=> '<td>',
-			'cal_cell_content'			=> '<a href="{content}">{day}</a>',
-			'cal_cell_content_today'	=> '<a href="{content}"><strong>{day}</strong></a>',
-			'cal_cell_no_content'		=> '{day}',
-			'cal_cell_no_content_today'	=> '<strong>{day}</strong>',
-			'cal_cell_blank'			=> '&nbsp;',
-			'cal_cell_end'				=> '</td>',
-			'cal_cell_end_today'		=> '</td>',
-			'cal_row_end'				=> '</tr>',
-			'table_close'				=> '</table>'
+			'table_open'                 => '<table border="1" cellpadding="4" cellspacing="0">',
+			'heading_row_start'          => '<tr>',
+			'heading_previous_cell'      => '<th><a href="{previous_url}">&lt;&lt;</a></th>',
+			'heading_title_cell'         => '<th colspan="{colspan}">{heading}</th>',
+			'heading_next_cell'          => '<th><a href="{next_url}">&gt;&gt;</a></th>',
+			'heading_row_end'            => '</tr>',
+			'week_row_start'             => '<tr>',
+			'week_day_cell'              => '<td>{week_day}</td>',
+			'week_row_end'               => '</tr>',
+			'cal_row_start'              => '<tr>',
+			'cal_cell_start'             => '<td>',
+			'cal_cell_start_today'       => '<td>',
+			'cal_cell_start_other'       => '<td>',
+			'cal_cell_start_other_today' => '<td>',
+			'cal_cell_content'           => '<a href="{content}">{day}</a>',
+			'cal_cell_content_today'     => '<a href="{content}"><strong>{day}</strong></a>',
+			'cal_cell_no_content'        => '{day}',
+			'cal_cell_no_content_today'  => '<strong>{day}</strong>',
+			'cal_cell_blank'             => '&nbsp;',
+			'cal_cell_end'               => '</td>',
+			'cal_cell_end_today'         => '</td>',
+			'cal_row_end'                => '</tr>',
+			'table_close'                => '</table>'
 		);
 	}
 
@@ -403,9 +450,9 @@ class CalendarGenerator {
 			return;
 		}
 
-		$today = array('cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today');
+		$today = array('cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today', 'cal_cell_start_other_today');
 
-		foreach (array('table_open', 'table_close', 'heading_row_start', 'heading_previous_cell', 'heading_title_cell', 'heading_next_cell', 'heading_row_end', 'week_row_start', 'week_day_cell', 'week_row_end', 'cal_row_start', 'cal_cell_start', 'cal_cell_content', 'cal_cell_no_content',  'cal_cell_blank', 'cal_cell_end', 'cal_row_end', 'cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today') as $val)
+		foreach (array('table_open', 'table_close', 'heading_row_start', 'heading_previous_cell', 'heading_title_cell', 'heading_next_cell', 'heading_row_end', 'week_row_start', 'week_day_cell', 'week_row_end', 'cal_row_start', 'cal_cell_start', 'cal_cell_content', 'cal_cell_no_content',  'cal_cell_blank', 'cal_cell_end', 'cal_row_end', 'cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today', 'cal_cell_start_other', 'cal_cell_start_other_today') as $val)
 		{
 			if (preg_match("/\{".$val."\}(.*?)\{\/".$val."\}/si", $this->template, $match))
 			{
