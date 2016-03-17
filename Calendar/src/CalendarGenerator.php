@@ -185,9 +185,10 @@ class CalendarGenerator {
 				{
 					$out .= $day == $cur_day ? $this->temp['cal_cell_start_other_today'] : $this->temp['cal_cell_start_other'];	
 
-					if(!$next_prev_days)
+					if(!$this->next_prev_days)
 					{
 						$day_print ='';
+						$data[$day] = '';
 					}
 					elseif($day < 1)
 					{
