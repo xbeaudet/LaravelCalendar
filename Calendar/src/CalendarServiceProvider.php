@@ -10,6 +10,12 @@ class CalendarServiceProvider extends ServiceProvider {
 	 * @var bool
 	 */
 	protected $defer = false;
+    
+    public function boot()
+    {
+        $this->loadTranslationsFrom(__DIR__.'/lang', 'calendar');
+        
+    }
 
 	/**
 	 * Register the service provider.
@@ -23,16 +29,6 @@ class CalendarServiceProvider extends ServiceProvider {
 			$request = $app['request'];
 			return new CalendarGenerator($request);
 		});
-	}
-
-	/**
-	 * Get the services provided by the provider.
-	 *
-	 * @return array
-	 */
-	public function provides()
-	{
-		return array();
 	}
 
 }
