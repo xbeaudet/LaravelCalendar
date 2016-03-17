@@ -177,7 +177,16 @@ class CalendarGenerator {
 			{
 				if ($day > 0 AND $day <= $total_days)
 				{
-					$out .= ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_start_today'] : $this->temp['cal_cell_start'];
+					if(isset($data[$day]))
+					{
+						$out .= ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_start_content_today'] : $this->temp['cal_cell_start_content'];
+					
+					}
+					else
+					{
+						$out .= ($is_current_month == TRUE AND $day == $cur_day) ? $this->temp['cal_cell_start_today'] : $this->temp['cal_cell_start'];
+						
+					}
 					
 					$day_print = ($this->day_month_format == 'long' ? str_repeat('0', 2-strlen($day)).$day : $day);
 				}
@@ -418,6 +427,8 @@ class CalendarGenerator {
 			'cal_cell_start_today'       => '<td>',
 			'cal_cell_start_other'       => '<td>',
 			'cal_cell_start_other_today' => '<td>',
+			'cal_cell_start_content'       => '<td>',
+			'cal_cell_start_content_today' => '<td>',
 			'cal_cell_content'           => '<a href="{content}">{day}</a>',
 			'cal_cell_content_today'     => '<a href="{content}"><strong>{day}</strong></a>',
 			'cal_cell_no_content'        => '{day}',
@@ -450,9 +461,9 @@ class CalendarGenerator {
 			return;
 		}
 
-		$today = array('cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today', 'cal_cell_start_other_today');
+		$today = array('cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today', 'cal_cell_start_other_today', 'cal_cell_start_content_today');
 
-		foreach (array('table_open', 'table_close', 'heading_row_start', 'heading_previous_cell', 'heading_title_cell', 'heading_next_cell', 'heading_row_end', 'week_row_start', 'week_day_cell', 'week_row_end', 'cal_row_start', 'cal_cell_start', 'cal_cell_content', 'cal_cell_no_content',  'cal_cell_blank', 'cal_cell_end', 'cal_row_end', 'cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today', 'cal_cell_start_other', 'cal_cell_start_other_today') as $val)
+		foreach (array('table_open', 'table_close', 'heading_row_start', 'heading_previous_cell', 'heading_title_cell', 'heading_next_cell', 'heading_row_end', 'week_row_start', 'week_day_cell', 'week_row_end', 'cal_row_start', 'cal_cell_start', 'cal_cell_content', 'cal_cell_no_content',  'cal_cell_blank', 'cal_cell_end', 'cal_row_end', 'cal_cell_start_today', 'cal_cell_content_today', 'cal_cell_no_content_today', 'cal_cell_end_today', 'cal_cell_start_other', 'cal_cell_start_other_today', 'cal_cell_start_content', 'cal_cell_start_content_today') as $val)
 		{
 			if (preg_match("/\{".$val."\}(.*?)\{\/".$val."\}/si", $this->template, $match))
 			{
