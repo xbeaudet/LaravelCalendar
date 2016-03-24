@@ -290,7 +290,7 @@ class CalendarGenerator {
 	 * @param	integer	the month
 	 * @return	string
 	 */
-	protected function get_month_name($month)
+	public function get_month_name($month)
 	{
 		if ($this->month_type == 'short')
 		{
@@ -318,7 +318,7 @@ class CalendarGenerator {
 	 * @param	string
 	 * @return	array
 	 */
-	protected function get_day_names($day_type = '')
+	public function get_day_names($day_type = '')
 	{
 		if ($day_type != '')
 			$this->day_type = $day_type;
@@ -359,7 +359,7 @@ class CalendarGenerator {
 	 * @param	integer	the year
 	 * @return	array
 	 */
-	protected function adjust_date($month, $year)
+	public function adjust_date($month, $year)
 	{
 		$date = array();
 
@@ -396,7 +396,7 @@ class CalendarGenerator {
 	 * @param	integer	the year
 	 * @return	integer
 	 */
-	protected function get_total_days($month, $year)
+	public function get_total_days($month, $year)
 	{
 		$days_in_month	= array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 
